@@ -113,7 +113,10 @@ class ArloBaseStation(object):
         """
         if mode not in ACTION_MODES.keys():
             return "Invalid mode"
-        return self.__run_action(mode)
+        
+        success = self.__run_action(mode)
+        if success == False:
+            raise ValueError('Failed to set Arlo mode: ' + mode);
 
     def update(self):
         """Update object properties."""

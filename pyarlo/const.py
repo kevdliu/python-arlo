@@ -22,7 +22,7 @@ PRELOAD_DAYS = 30
 ACTION_MODES = {
     'armed': 'mode1',
     'disarmed': 'mode0',
-    'custom': 'mode2',
+    'home': 'mode2',
     'schedule': 'true',
 }
 

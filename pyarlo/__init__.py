@@ -8,7 +8,7 @@ from pyarlo.camera import ArloCamera
 from pyarlo.media import ArloMediaLibrary
 from pyarlo.const import (
     BILLING_ENDPOINT, DEVICES_ENDPOINT, FRIENDS_ENDPOINT,
-    LOGIN_ENDPOINT, PROFILE_ENDPOINT, PRELOAD_DAYS,
+    LOGIN_ENDPOINT, LOGOUT_ENDPOINT, PROFILE_ENDPOINT, PRELOAD_DAYS,
     RESET_ENDPOINT)
 
 _LOGGER = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class PyArlo(object):
     """Base object for Netgar Arlo camera."""
 
     def __init__(self, username=None, password=None,
-                 preload=True, days=PRELOAD_DAYS):
+                 preload=False, days=PRELOAD_DAYS):
         """Create a PyArlo object.
 
         :param username: Arlo user email
@@ -42,7 +42,9 @@ class PyArlo(object):
         self.session = requests.Session()
 
         # login user
-        self.login()
+        success = self.login()
+        if success == False:
+            raise ValueError('Failed to login to Arlo');
 
         # pylint: disable=invalid-name
         self.ArloMediaLibrary = ArloMediaLibrary(self,
@@ -56,7 +58,7 @@ class PyArlo(object):
     def login(self):
         """Login to the Arlo account."""
         _LOGGER.debug("Creating Arlo session")
-        self._authenticate()
+        return self._authenticate()
 
     def _authenticate(self):
         """Authenticate user and generate token."""
@@ -74,6 +76,9 @@ class PyArlo(object):
 
             # update header with the generated token
             self.__headers['Authorization'] = self.__token
+            return True;
+        else:
+            return False;
 
     def cleanup_headers(self):
         """Reset the headers and params."""
@@ -83,6 +88,12 @@ class PyArlo(object):
 
         params = {'email': self.__username, 'password': self.__password}
         self.__params = params
+        
+    def logout(self):
+        data = self.query(LOGOUT_ENDPOINT, method='PUT');
+        success = data.get('success');
+        if success == False:
+            raise ValueError('Failed to logout of Arlo');
 
     def query(self,
               url,
@@ -156,6 +167,16 @@ class PyArlo(object):
     def base_stations(self):
         """Return all base stations linked on Arlo account."""
         return self.devices['base_station']
+        
+    @property
+    def base(self):
+        bases = self.devices['base_station'];
+        count = len(bases);
+        
+        if (count != 1):
+            raise ValueError('Wrong number of Arlo base stations: ' + count);
+        else:
+            return bases[0];
 
     @property
     def devices(self):
