@@ -1,10 +1,6 @@
 # coding: utf-8
 """Generic Python Class file for Netgear Arlo Base Station module."""
-import logging
 from pyarlo.const import ACTION_MODES, NOTIFY_ENDPOINT, RUN_ACTION_BODY
-
-_LOGGER = logging.getLogger(__name__)
-
 
 class ArloBaseStation(object):
     """Arlo Base Station module implementation."""
@@ -88,12 +84,10 @@ class ArloBaseStation(object):
             body['resource'] = 'schedule'
             body['properties'] = {'active': 'true'}
 
-        _LOGGER.debug("Action body: %s", body)
-
         ret = \
             self._session.query(url, method='POST', extra_params=body,
                                 extra_headers={"xCloudId": self.xcloud_id})
-        return ret.get('success')
+        return ret.get('success') == True;
 
     @property
     def available_modes(self):
@@ -103,7 +97,7 @@ class ArloBaseStation(object):
     @property
     def mode(self):
         """Return current mode."""
-        return None
+        return "Unknown"
 
     @mode.setter
     def mode(self, mode):
@@ -115,11 +109,11 @@ class ArloBaseStation(object):
             return "Invalid mode"
         
         success = self.__run_action(mode)
-        if success == False:
+        if success != True:
             raise ValueError('Failed to set Arlo mode: ' + mode);
 
     def update(self):
         """Update object properties."""
-        self._attrs = self._session.refresh_attributes(self.name)
+        self._attrs = self._session.refresh_attributes(self.name);
 
 # vim:sw=4:ts=4:et:

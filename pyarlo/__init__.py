@@ -1,30 +1,21 @@
 # coding: utf-8
 """Base Python Class file for Netgear Arlo camera module."""
-import logging
 import requests
 
 from pyarlo.base_station import ArloBaseStation
 from pyarlo.camera import ArloCamera
 from pyarlo.media import ArloMediaLibrary
 from pyarlo.const import (
-    BILLING_ENDPOINT, DEVICES_ENDPOINT, FRIENDS_ENDPOINT,
-    LOGIN_ENDPOINT, LOGOUT_ENDPOINT, PROFILE_ENDPOINT, PRELOAD_DAYS,
-    RESET_ENDPOINT)
-
-_LOGGER = logging.getLogger(__name__)
-
-
+    DEVICES_ENDPOINT, LOGIN_ENDPOINT, LOGOUT_ENDPOINT)
+    
 class PyArlo(object):
     """Base object for Netgar Arlo camera."""
 
-    def __init__(self, username=None, password=None,
-                 preload=False, days=PRELOAD_DAYS):
+    def __init__(self, username=None, password=None):
         """Create a PyArlo object.
 
         :param username: Arlo user email
         :param password: Arlo user password
-        :param preload: Boolean to preload video library.
-        :param days: If preload, number of days to lookup.
 
         :returns PyArlo base object
         """
@@ -42,14 +33,11 @@ class PyArlo(object):
         self.session = requests.Session()
 
         # login user
-        success = self.login()
-        if success == False:
+        if self.login() == False:
             raise ValueError('Failed to login to Arlo');
 
         # pylint: disable=invalid-name
-        self.ArloMediaLibrary = ArloMediaLibrary(self,
-                                                 preload=preload,
-                                                 days=days)
+        self.ArloMediaLibrary = ArloMediaLibrary(self)
 
     def __repr__(self):
         """Object representation."""
@@ -57,7 +45,6 @@ class PyArlo(object):
 
     def login(self):
         """Login to the Arlo account."""
-        _LOGGER.debug("Creating Arlo session")
         return self._authenticate()
 
     def _authenticate(self):
@@ -66,7 +53,7 @@ class PyArlo(object):
         url = LOGIN_ENDPOINT
         data = self.query(url, method='POST')
 
-        if isinstance(data, dict) and data.get('success'):
+        if isinstance(data, dict) and data.get('success') == True:
             data = data.get('data')
             self.authenticated = data.get('authenticated')
             self.country_code = data.get('countryCode')
@@ -91,8 +78,7 @@ class PyArlo(object):
         
     def logout(self):
         data = self.query(LOGOUT_ENDPOINT, method='PUT');
-        success = data.get('success');
-        if success == False:
+        if data.get('success') != True:
             raise ValueError('Failed to logout of Arlo');
 
     def query(self,
@@ -126,16 +112,13 @@ class PyArlo(object):
                 params.update(extra_params)
             else:
                 params = self.__params
-            _LOGGER.debug("Params: %s", params)
 
             if extra_headers:
                 headers = self.__headers
                 headers.update(extra_headers)
             else:
                 headers = self.__headers
-            _LOGGER.debug("Headers: %s", headers)
 
-            _LOGGER.debug("Querying %s on attempt: %s/%s", url, loop, retry)
             loop += 1
 
             # define connection method
@@ -149,7 +132,6 @@ class PyArlo(object):
             req.raise_for_status()
             if req.status_code == 200:
                 if raw:
-                    _LOGGER.debug("Required raw object.")
                     response = req
                 else:
                     response = req.json()
@@ -219,35 +201,12 @@ class PyArlo(object):
                 return device
 
     @property
-    def unseen_videos_reset(self):
-        """Reset the unseen videos counter for all cameras."""
-        return self.query(RESET_ENDPOINT).get('success')
-
-    @property
-    def billing_information(self):
-        """Return billing json."""
-        url = BILLING_ENDPOINT
-        return self.query(url)
-
-    @property
-    def shared_users(self):
-        """Return shared users json."""
-        url = FRIENDS_ENDPOINT
-        return self.query(url)
-
-    @property
-    def profile(self):
-        """Return user profile json."""
-        url = PROFILE_ENDPOINT
-        return self.query(url)
-
-    @property
     def is_connected(self):
         """Return connection status."""
         return bool(self.authenticated)
 
     def update(self):
         """Refresh object."""
-        self._authenticate()
+        self._authenticate();
 
 # vim:sw=4:ts=4:et:
