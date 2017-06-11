@@ -90,7 +90,7 @@ class ArloCamera(object):
         
     def take_snapshot(self):
         stream = self.start_stream();
-        if stream == False:
+        if stream != True:
             raise ValueError('Failed to start stream for ' + self.name);
     
         url = SNAPSHOT_ENDPOINT;

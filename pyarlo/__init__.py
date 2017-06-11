@@ -33,7 +33,7 @@ class PyArlo(object):
         self.session = requests.Session()
 
         # login user
-        if self.login() == False:
+        if self.login() != True:
             raise ValueError('Failed to login to Arlo');
 
         # pylint: disable=invalid-name
