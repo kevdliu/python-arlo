@@ -87,6 +87,12 @@ class ArloCamera(object):
         """Return last image capture by camera."""
         self.update()
         return http_get(self._attrs.get('presignedLastImageUrl'))
+        
+    @property
+    def last_image_url(self):
+        """Return last image capture by camera."""
+        self.update();
+        return self._attrs.get('presignedLastImageUrl');
 
     @property
     def last_video(self):
