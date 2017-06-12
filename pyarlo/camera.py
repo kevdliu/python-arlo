@@ -60,20 +60,12 @@ class ArloCamera(object):
     @property
     def last_video(self):
         library = ArloMediaLibrary(self._session);
-        
-        try:
-            return library.load(self, 1, latest = True, filter = FILTER_VIDEO_ONLY);
-        except IndexError:
-            return None
+        return library.load(self, 1, latest = True, filter = FILTER_VIDEO_ONLY);
             
     @property
     def last_snapshot(self):
         library = ArloMediaLibrary(self._session);
-        
-        try:
-            return library.load(self, 1, latest = True, filter = FILTER_SNAPSHOT_ONLY);
-        except IndexError:
-            return None
+        return library.load(self, 1, latest = True, filter = FILTER_SNAPSHOT_ONLY);
 
     @property
     def medias(self, days = 7):

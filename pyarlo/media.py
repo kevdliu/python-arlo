@@ -31,13 +31,12 @@ class ArloMediaLibrary(object):
             if (cam.device_id == src_cam_id) and ((filter and media.get('contentType') == filter) or filter == None):
                 medias.append(ArloMedia(media, cam, self._session)); 
 
-        if latest:
-            if len(medias) > 0:
-                return medias[0];
-            else:
-                raise ValueError('No media available for ' + cam.name);
-            
-        return medias
+        if len(medias) == 0:
+            return None;
+        elif latest:
+            return medias[0];
+        else:
+            return medias;
 
 class ArloMedia(object):
 
