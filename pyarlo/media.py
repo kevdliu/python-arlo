@@ -33,7 +33,7 @@ class ArloMediaLibrary(object):
 
         if latest:
             if len(medias) > 0:
-                return medias[-1];
+                return medias[0];
             else:
                 raise ValueError('No media available for ' + cam.name);
             
