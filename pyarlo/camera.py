@@ -18,6 +18,10 @@ class ArloCamera(object):
     @property
     def device_id(self):
         return self._attrs.get('deviceId')
+        
+    @property
+    def device_name(self):
+        return self.name;
 
     @property
     def device_type(self):
